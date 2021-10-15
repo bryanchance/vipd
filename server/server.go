@@ -73,5 +73,9 @@ func (s *Server) Run() error {
 
 func (s *Server) Stop() error {
 	s.agent.Unsubscribe(s.updateCh)
+	// remove vips
+	if err := s.removeVIPs(); err != nil {
+		logrus.WithError(err).Error("error removing VIPs")
+	}
 	return s.agent.Shutdown()
 }
