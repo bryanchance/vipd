@@ -22,6 +22,10 @@ type Config struct {
 	Peers []string
 	// LeaderPromotionTimeout is the timeout to self-elect as leader
 	LeaderPromotionTimeout duration
+	// PostUp is a list of commands to run after leader election
+	PostUp []string
+	// PostDown is a list of commands to run after leader election lost
+	PostDown []string
 }
 
 type duration struct {

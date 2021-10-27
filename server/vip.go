@@ -1,6 +1,10 @@
 package server
 
 import (
+	"fmt"
+	"os/exec"
+	"strings"
+
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 )
@@ -47,6 +51,20 @@ func (s *Server) updateVIPs() error {
 			if err := netlink.AddrAdd(iface, vipAddr); err != nil {
 				return err
 			}
+
+		}
+	}
+
+	// run post up
+	for _, c := range s.config.PostUp {
+		logrus.Debugf("running post up command: %s", c)
+		out, err := runCommand(c)
+		if err != nil {
+			logrus.WithError(err).Error("error running command")
+			continue
+		}
+		if out != "" {
+			logrus.Debug(out)
 		}
 	}
 
@@ -78,6 +96,38 @@ func (s *Server) removeVIPs() error {
 			}
 		}
 	}
+	// run post up
+	for _, c := range s.config.PostDown {
+		logrus.Debugf("running post down command: %s", c)
+		out, err := runCommand(c)
+		if err != nil {
+			logrus.WithError(err).Error("error running command")
+			continue
+		}
+		if out != "" {
+			logrus.Debug(out)
+		}
+	}
 
 	return nil
+}
+
+func runCommand(command string) (string, error) {
+	p := strings.Fields(command)
+	args := []string{}
+	if len(p) == 0 {
+		return "", fmt.Errorf("command not specified")
+	}
+	cmd := p[0]
+	if len(p) > 1 {
+		args = p[1:]
+	}
+
+	c := exec.Command(cmd, args...)
+	o, err := c.Output()
+	if err != nil {
+		return "", fmt.Errorf(string(o))
+	}
+
+	return strings.TrimSpace(string(o)), nil
 }
