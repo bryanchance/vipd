@@ -7,7 +7,7 @@ var (
 	Name = "vipd"
 
 	// Version defines the application version
-	Version = "0.1.0"
+	Version = "next"
 
 	// Description is the application description
 	Description = "virtual ip daemon"
