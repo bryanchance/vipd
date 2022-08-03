@@ -10,7 +10,6 @@ builds:
       - CGO_ENABLED=0
     goos:
       - linux
-      - darwin
     goarch:
       - amd64
       - arm64
@@ -20,8 +19,6 @@ archives:
   - id: vipd
     builds:
       - vipd
-    replacements:
-      darwin: macOS
     name_template: "vipd_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 release:
   github:
