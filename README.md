@@ -27,3 +27,16 @@ time="2021-12-28T17:01:12Z" level=debug msg="checking peer nodeC: 2021-12-28 16:
 time="2021-12-28T17:01:12Z" level=debug msg="new leader: nodeA"
 time="2021-12-28T17:01:12Z" level=debug msg="activating vip 10.10.255.2/16 on eth0"
 ```
+
+# Hooks
+There are hooks to enable commands to be executed during certain phases of the activate / deactivate process.
+
+## PreUp
+These hooks are executed after gaining leadership but _before_ applying the VIPs.
+
+## PostUp
+These hooks are executed after the VIPs have been applied. For example, running a command to
+send a [gratituous ARP](https://wiki.wireshark.org/Gratuitous_ARP) request to inform of the change.
+
+## PostDown
+These hooks are executed after the VIPs have been removed.
