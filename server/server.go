@@ -1,6 +1,7 @@
 package server
 
 import (
+	"sync"
 	"time"
 
 	"github.com/ehazlett/element"
@@ -13,10 +14,12 @@ const (
 )
 
 type Server struct {
-	config   *vipd.Config
-	agent    *element.Agent
-	started  time.Time
-	updateCh chan *element.NodeEvent
+	config        *vipd.Config
+	agent         *element.Agent
+	started       time.Time
+	updateCh      chan *element.NodeEvent
+	currentLeader string
+	mu            *sync.Mutex
 }
 
 func NewServer(cfg *vipd.Config) (*Server, error) {
@@ -41,10 +44,12 @@ func NewServer(cfg *vipd.Config) (*Server, error) {
 	updateCh := agent.Subscribe()
 
 	return &Server{
-		config:   cfg,
-		agent:    agent,
-		started:  time.Now(),
-		updateCh: updateCh,
+		config:        cfg,
+		agent:         agent,
+		started:       time.Now(),
+		updateCh:      updateCh,
+		currentLeader: "",
+		mu:            &sync.Mutex{},
 	}, nil
 }
 

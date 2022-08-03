@@ -18,7 +18,7 @@ func (s *Server) nodeEventHandler() {
 				continue
 			}
 
-			logrus.Debugf("new leader: %s", newLeader)
+			logrus.Debugf("leader: %s", newLeader)
 			if err := s.reconcile(newLeader); err != nil {
 				logrus.WithError(err).Error("error reconciling vips")
 			}
@@ -57,6 +57,16 @@ func (s *Server) getLeaderPeerID() (string, error) {
 }
 
 func (s *Server) reconcile(leader string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if leader == s.currentLeader {
+		logrus.Debugf("no leader change; skipping reconcile")
+		return nil
+	}
+
+	s.currentLeader = leader
+
 	if leader == s.config.NodeName {
 		return s.updateVIPs()
 	}

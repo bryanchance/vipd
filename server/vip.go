@@ -22,6 +22,19 @@ func (s *Server) validateVIPs() error {
 }
 
 func (s *Server) updateVIPs() error {
+	// run pre up
+	for _, c := range s.config.PreUp {
+		logrus.Debugf("running pre up command: %s", c)
+		out, err := runCommand(c)
+		if err != nil {
+			logrus.WithError(err).Error("error running command")
+			continue
+		}
+		if out != "" {
+			logrus.Debug(out)
+		}
+	}
+
 	for _, vip := range s.config.VirtualIPs {
 		iface, err := netlink.LinkByName(vip.Interface)
 		if err != nil {
@@ -126,7 +139,8 @@ func runCommand(command string) (string, error) {
 	c := exec.Command(cmd, args...)
 	o, err := c.Output()
 	if err != nil {
-		return "", fmt.Errorf(string(o))
+		logrus.Errorf("%+v", err)
+		return "", fmt.Errorf("exit %d: %s", c.ProcessState.ExitCode(), fmt.Errorf(string(o)))
 	}
 
 	return strings.TrimSpace(string(o)), nil
